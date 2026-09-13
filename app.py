@@ -59,7 +59,7 @@ for name in selected_etfs:
 df = pd.DataFrame(results)
 st.dataframe(df)
 
-# --- Chart: Projected Balances ---
+# --- Chart 1: Projected Balances ---
 fund_names = [r["ETF"] for r in results]
 balances = [float(r[f"Projected TFSA ({years}Y)"].replace("R","").replace(",","")) for r in results]
 
@@ -81,12 +81,50 @@ for bar, label in zip(bars_balance, fund_names):
 
 st.pyplot(fig1)
 
+# --- Chart 2: TER vs Net Returns (new clean version) ---
+ters = [float(r["TER"].replace("%","")) for r in results]
+net_returns = [float(r["Net Return (CAGR - TER)"].replace("%","")) for r in results]
+
+fig2, ax2 = plt.subplots()
+x = range(len(fund_names))
+width = 0.35
+
+bars_ter = ax2.bar([i - width/2 for i in x], ters, width, label="TER (%)", color="lightgreen")
+bars_net = ax2.bar([i + width/2 for i in x], net_returns, width, label="Net Return (%)", color="salmon")
+
+ax2.set_ylabel("Percentage (%)")
+ax2.set_title("TER vs Net Return")
+
+# 🚫 Remove bottom labels completely
+ax2.set_xticks([])
+ax2.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+
+# ✅ Add ETF names inside bars + values above bars
+for bar, label in zip(bars_ter, fund_names):
+    height = bar.get_height()
+    ax2.text(bar.get_x() + bar.get_width()/2, height/2,
+             label, ha='center', va='center', rotation=90, color='black', fontsize=8)
+    ax2.text(bar.get_x() + bar.get_width()/2, height,
+             f"{height:.2f}%", ha='center', va='bottom', fontsize=8, color='green')
+
+for bar, label in zip(bars_net, fund_names):
+    height = bar.get_height()
+    ax2.text(bar.get_x() + bar.get_width()/2, height/2,
+             label, ha='center', va='center', rotation=90, color='black', fontsize=8)
+    ax2.text(bar.get_x() + bar.get_width()/2, height,
+             f"{height:.2f}%", ha='center', va='bottom', fontsize=8, color='red')
+
+# Legend moved to bottom
+ax2.legend(loc="lower center", bbox_to_anchor=(0.5, -0.15), ncol=2)
+
+st.pyplot(fig2)
+
 # --- Numeric Summary Table ---
 summary_data = pd.DataFrame({
     "ETF": fund_names,
     "Projected Balance (R)": balances,
-    "TER (%)": [float(r["TER"].replace("%","")) for r in results],
-    "Net Return (%)": [float(r["Net Return (CAGR - TER)"].replace("%","")) for r in results]
+    "TER (%)": ters,
+    "Net Return (%)": net_returns
 })
 st.subheader("Numeric Summary")
 st.table(summary_data.style.format({

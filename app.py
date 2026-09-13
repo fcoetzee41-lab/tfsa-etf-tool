@@ -15,7 +15,6 @@ st.sidebar.header("TFSA Simulation Settings")
 annual_contribution = st.sidebar.number_input("Annual Contribution (R)", value=36000, step=1000)
 years = st.sidebar.slider("Investment Horizon (Years)", 5, 30, 20)
 contribution_frequency = st.sidebar.selectbox("Contribution Frequency", ["Annual", "Monthly", "Quarterly"])
-
 selected_etfs = st.sidebar.multiselect("Select ETFs", list(etfs.keys()), default=list(etfs.keys()))
 
 # Functions
@@ -60,8 +59,8 @@ for name in selected_etfs:
 df = pd.DataFrame(results)
 st.dataframe(df)
 
-# Chart visualization with 3 columns per ETF
-fig, ax = plt.subplots()
+# Chart visualization with dual axes
+fig, ax1 = plt.subplots()
 
 fund_names = [r["ETF"] for r in results]
 balances = [float(r[f"Projected TFSA ({years}Y)"].replace("R","").replace(",","")) for r in results]
@@ -71,20 +70,44 @@ net_returns = [float(r["Net Return (CAGR - TER)"].replace("%","")) for r in resu
 x = range(len(fund_names))
 width = 0.25
 
-bars_balance = ax.bar([i - width for i in x], balances, width, label="Projected Balance (R)", color="skyblue")
-bars_ter = ax.bar(x, ters, width, label="TER (%)", color="lightgreen")
-bars_net = ax.bar([i + width for i in x], net_returns, width, label="Net Return (%)", color="salmon")
+# Left axis for balances
+bars_balance = ax1.bar([i - width for i in x], balances, width, label="Projected Balance (R)", color="skyblue")
+ax1.set_ylabel("Projected Balance (R)")
+ax1.set_title(f"{years}-Year TFSA Growth Comparison")
 
-ax.set_ylabel("Values")
-ax.set_title(f"{years}-Year TFSA Growth Comparison")
-ax.set_xticks(x)
-ax.set_xticklabels(fund_names, rotation=45, ha="right")
-ax.legend()
+# Right axis for percentages
+ax2 = ax1.twinx()
+bars_ter = ax2.bar(x, ters, width, label="TER (%)", color="lightgreen")
+bars_net = ax2.bar([i + width for i in x], net_returns, width, label="Net Return (%)", color="salmon")
+ax2.set_ylabel("TER / Net Return (%)")
+
+# Remove bottom labels
+ax1.set_xticks([])
+ax2.set_xticks([])
 
 # Add vertical ETF names inside balance bars
 for bar, label in zip(bars_balance, fund_names):
     height = bar.get_height()
-    ax.text(bar.get_x() + bar.get_width()/2, height/2,
-            label, ha='center', va='center', rotation=90, color='black', fontsize=8)
+    ax1.text(bar.get_x() + bar.get_width()/2, height/2,
+             label, ha='center', va='center', rotation=90, color='black', fontsize=8)
+
+# Combine legends from both axes
+bars = bars_balance + bars_ter + bars_net
+labels = [b.get_label() for b in bars]
+ax1.legend(bars, labels, loc="upper right")
 
 st.pyplot(fig)
+
+# Numeric summary table below chart
+summary_data = pd.DataFrame({
+    "ETF": fund_names,
+    "Projected Balance (R)": balances,
+    "TER (%)": ters,
+    "Net Return (%)": net_returns
+})
+st.subheader("Numeric Summary")
+st.table(summary_data.style.format({
+    "Projected Balance (R)": "R{:,.0f}",
+    "TER (%)": "{:.2f}%",
+    "Net Return (%)": "{:.2f}%"
+}))

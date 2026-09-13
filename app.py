@@ -67,7 +67,10 @@ fig1, ax1 = plt.subplots()
 bars_balance = ax1.bar(fund_names, balances, color="skyblue")
 ax1.set_ylabel("Projected Balance (R)")
 ax1.set_title(f"{years}-Year TFSA Projected Balances")
-ax1.set_xticks([])  # remove bottom labels
+
+# Remove bottom labels completely
+ax1.set_xticks([])
+ax1.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
 
 for bar, label in zip(bars_balance, fund_names):
     height = bar.get_height()
@@ -93,7 +96,10 @@ bars_net = ax2.bar([i + width/2 for i in x], net_returns, width, label="Net Retu
 
 ax2.set_ylabel("Percentage (%)")
 ax2.set_title("TER vs Net Return")
-ax2.set_xticks([])  # remove bottom labels
+
+# Remove bottom labels completely
+ax2.set_xticks([])
+ax2.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
 
 # Add ETF names inside bars + values above bars
 for bar, label in zip(bars_ter, fund_names):

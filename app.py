@@ -110,7 +110,9 @@ for bar, label in zip(bars_net, fund_names):
     ax2.text(bar.get_x() + bar.get_width()/2, height,
              f"{height:.2f}%", ha='center', va='bottom', fontsize=8, color='red')
 
-ax2.legend()
+# Legend moved to bottom
+ax2.legend(loc="lower center", bbox_to_anchor=(0.5, -0.15), ncol=2)
+
 st.pyplot(fig2)
 
 # --- Numeric Summary Table ---

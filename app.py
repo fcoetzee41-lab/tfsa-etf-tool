@@ -74,10 +74,8 @@ ax1.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=Fal
 
 for bar, label in zip(bars_balance, fund_names):
     height = bar.get_height()
-    # ETF name inside bar
     ax1.text(bar.get_x() + bar.get_width()/2, height/2,
              label, ha='center', va='center', rotation=90, color='black', fontsize=8)
-    # Value above bar
     ax1.text(bar.get_x() + bar.get_width()/2, height,
              f"R{height:,.0f}", ha='center', va='bottom', fontsize=8, color='blue')
 
@@ -97,11 +95,11 @@ bars_net = ax2.bar([i + width/2 for i in x], net_returns, width, label="Net Retu
 ax2.set_ylabel("Percentage (%)")
 ax2.set_title("TER vs Net Return")
 
-# Remove bottom labels completely
+# 🚫 Remove bottom labels completely
 ax2.set_xticks([])
 ax2.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
 
-# Add ETF names inside bars + values above bars
+# ✅ Add ETF names inside bars + values above bars
 for bar, label in zip(bars_ter, fund_names):
     height = bar.get_height()
     ax2.text(bar.get_x() + bar.get_width()/2, height/2,

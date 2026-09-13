@@ -59,10 +59,28 @@ for name in selected_etfs:
 df = pd.DataFrame(results)
 st.dataframe(df)
 
-# Chart visualization
+# Chart visualization with vertical inside-bar labels
 fig, ax = plt.subplots()
-bars = [float(r[f"Projected TFSA ({years}Y)"].replace("R","").replace(",","")) for r in results]
-ax.bar([r["ETF"] for r in results], bars)
+bars_values = [float(r[f"Projected TFSA ({years}Y)"].replace("R","").replace(",","")) for r in results]
+bars = ax.bar([r["ETF"] for r in results], bars_values)
+
 ax.set_ylabel("Projected TFSA Balance (R)")
 ax.set_title(f"{years}-Year TFSA Growth Comparison")
+
+# Add vertical ETF names inside each bar
+for bar, label in zip(bars, [r["ETF"] for r in results]):
+    height = bar.get_height()
+    ax.text(
+        bar.get_x() + bar.get_width()/2,
+        height/2,
+        label,
+        ha='center', va='center',
+        rotation=90,
+        color='black',
+        fontsize=8
+    )
+
+# Remove x-axis tick labels since names are inside bars
+ax.set_xticks([])
+
 st.pyplot(fig)

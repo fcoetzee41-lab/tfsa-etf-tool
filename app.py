@@ -81,7 +81,7 @@ for bar, label in zip(bars_balance, fund_names):
 
 st.pyplot(fig1)
 
-# --- Chart 2: TER and Net Returns ---
+# --- Chart 2: TER and Net Returns (rebuilt cleanly) ---
 ters = [float(r["TER"].replace("%","")) for r in results]
 net_returns = [float(r["Net Return (CAGR - TER)"].replace("%","")) for r in results]
 

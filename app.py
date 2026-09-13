@@ -53,34 +53,38 @@ for name in selected_etfs:
         "ETF": name,
         "CAGR (5Y)": f"{round(cagr*100,2)}%",
         "TER": f"{info['TER']*100:.2f}%",
+        "Net Return (CAGR - TER)": f"{(cagr - info['TER'])*100:.2f}%",
         f"Projected TFSA ({years}Y)": f"R{tfsa_growth:,.0f}"
     })
 
 df = pd.DataFrame(results)
 st.dataframe(df)
 
-# Chart visualization with vertical inside-bar labels
+# Chart visualization with 3 columns per ETF
 fig, ax = plt.subplots()
-bars_values = [float(r[f"Projected TFSA ({years}Y)"].replace("R","").replace(",","")) for r in results]
-bars = ax.bar([r["ETF"] for r in results], bars_values)
 
-ax.set_ylabel("Projected TFSA Balance (R)")
+fund_names = [r["ETF"] for r in results]
+balances = [float(r[f"Projected TFSA ({years}Y)"].replace("R","").replace(",","")) for r in results]
+ters = [float(r["TER"].replace("%","")) for r in results]
+net_returns = [float(r["Net Return (CAGR - TER)"].replace("%","")) for r in results]
+
+x = range(len(fund_names))
+width = 0.25
+
+bars_balance = ax.bar([i - width for i in x], balances, width, label="Projected Balance (R)", color="skyblue")
+bars_ter = ax.bar(x, ters, width, label="TER (%)", color="lightgreen")
+bars_net = ax.bar([i + width for i in x], net_returns, width, label="Net Return (%)", color="salmon")
+
+ax.set_ylabel("Values")
 ax.set_title(f"{years}-Year TFSA Growth Comparison")
+ax.set_xticks(x)
+ax.set_xticklabels(fund_names, rotation=45, ha="right")
+ax.legend()
 
-# Add vertical ETF names inside each bar
-for bar, label in zip(bars, [r["ETF"] for r in results]):
+# Add vertical ETF names inside balance bars
+for bar, label in zip(bars_balance, fund_names):
     height = bar.get_height()
-    ax.text(
-        bar.get_x() + bar.get_width()/2,
-        height/2,
-        label,
-        ha='center', va='center',
-        rotation=90,
-        color='black',
-        fontsize=8
-    )
-
-# Remove x-axis tick labels since names are inside bars
-ax.set_xticks([])
+    ax.text(bar.get_x() + bar.get_width()/2, height/2,
+            label, ha='center', va='center', rotation=90, color='black', fontsize=8)
 
 st.pyplot(fig)
